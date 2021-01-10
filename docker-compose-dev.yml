@@ -1,0 +1,79 @@
+version: "3"
+services:
+  postgres:
+    image: "postgres:latest"
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: complex
+      POSTGRES_USER: complex
+      POSTGRES_PASSWORD: complex
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: always
+    ports:
+      - "7070:80"
+    depends_on: 
+      - api
+      - client
+
+  redis:
+    image: "redis:latest"
+    container_name: redis
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: api
+    volumes:
+      - /app/node_modules
+      - ./server:/app
+    ports:
+      - "5000:5000"
+    restart: always
+    depends_on: 
+      - postgres
+      - redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PGUSER: complex
+      PGHOST: postgres
+      PGDATABASE: complex
+      PGPASSWORD: complex
+      PGPORT: 5432
+      PORT: 4000
+
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile.dev
+    container_name: worker
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+    restart: always
+    depends_on: 
+      - redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+  client:
+    stdin_open: true
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: client
+    depends_on: 
+      - api
+    volumes:
+      - /app/node_modules
+      - ./client:/app
