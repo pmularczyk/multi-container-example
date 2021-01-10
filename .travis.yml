@@ -22,3 +22,15 @@ after_success:
   - docker push pm90/multi-server
   - docker push pm90/multi-worker
   - docker push pm90/multi-nginx
+
+# deploy:
+#   provider: elasticbeanstalk
+#   region: "eu-central-1"
+#   app: "react-example-travis"
+#   env: "ReactExampleTravis-env"
+#   bucket_name: "elasticbeanstalk-eu-central-1-277367360328"
+#   bucket_path: "react-example-travis"
+#   on:
+#     branch: master
+#   access_key_id: $AWS_ACCESS_KEY
+#   secret_access_key: $AWS_SECRET_KEY
